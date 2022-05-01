@@ -53,9 +53,9 @@ public:
 
     void issueCommandDevice(const QObject *receiver, const QString &fullDeviceId, const QJsonObject &command, ReplyCb code);
 
-    void deleteDevice(const QObject *receiver, const QString &enterpriseId, const QString &deviceId, ReplyCb code);
+    void deleteDevice(const QObject *receiver, const QString &enterpriseId, const QString &deviceId, const QUrlQuery &query, ReplyCb code);
 
-    void deleteDevice(const QObject *receiver, const QString &fullDeviceId, ReplyCb code);
+    void deleteDevice(const QObject *receiver, const QString &fullDeviceId, const QUrlQuery &query, ReplyCb code);
 
     void getPolicies(const QObject *receiver, const QString &enterpriseId, ReplyCb code);
 

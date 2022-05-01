@@ -310,16 +310,17 @@ void AndroidManagement::issueCommandDevice(const QObject *receiver, const QStrin
     });
 }
 
-void AndroidManagement::deleteDevice(const QObject *receiver, const QString &enterpriseId, const QString &deviceId, ReplyCb code)
+void AndroidManagement::deleteDevice(const QObject *receiver, const QString &enterpriseId, const QString &deviceId, const QUrlQuery &query, ReplyCb code)
 {
-    deleteDevice(receiver, QLatin1String("enterprises/") + enterpriseId + QLatin1String("/devices/") + deviceId, code);
+    deleteDevice(receiver, QLatin1String("enterprises/") + enterpriseId + QLatin1String("/devices/") + deviceId, query, code);
 }
 
-void AndroidManagement::deleteDevice(const QObject *receiver, const QString &fullDeviceId, ReplyCb code)
+void AndroidManagement::deleteDevice(const QObject *receiver, const QString &fullDeviceId, const QUrlQuery &query, ReplyCb code)
 {
     getAccessToken(receiver, [=] (const GoogleCloudReply &accessToken) {
         QUrl url = m_service;
         url.setPath(QLatin1String("/v1/") + fullDeviceId);
+        url.setQuery(query);
 
         qDebug() << "delete deviceId" << url << fullDeviceId;
         QNetworkReply *reply = m_nam->deleteResource(defaultRequest(url));
