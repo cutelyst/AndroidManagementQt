@@ -3,578 +3,595 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later
  */
 #include "androidmanagementpolicy.h"
+#include "googlecloudoauth2.h"
 
+#include <QJsonArray>
 #include <QMetaEnum>
 #include <QStringList>
 
 using namespace AndroidManagementQt;
 
-AndroidManagementPolicy::AndroidManagementPolicy()
+EnterprisePolicy::EnterprisePolicy()
 {
 
 }
 
-AndroidManagementPolicy::AndroidManagementPolicy(const AndroidManagementPolicy &other) : m_data(other.m_data)
+EnterprisePolicy::EnterprisePolicy(const EnterprisePolicy &other) : m_data(other.m_data)
 {
 
 }
 
-AndroidManagementPolicy::AndroidManagementPolicy(const QJsonObject &data) : m_data(data)
+EnterprisePolicy::EnterprisePolicy(const QJsonObject &data) : m_data(data)
 {
 
 }
 
-QString AndroidManagementPolicy::name() const
+EnterprisePolicy::EnterprisePolicy(const GoogleCloudReply &data) : m_data(data.data)
 {
-    return m_data[QLatin1String("name")].toString();
+
 }
 
-QString AndroidManagementPolicy::version() const
+QList<EnterprisePolicy> EnterprisePolicy::policiesFromReply(const GoogleCloudReply &data)
 {
-    return m_data[QLatin1String("version")].toString();
+    QList<EnterprisePolicy> ret;
+    const QJsonArray array = data.data.value(QStringLiteral("policies")).toArray();
+    for (const QJsonValue &p : array) {
+        ret.push_back(p.toObject());
+    }
+    return ret;
 }
 
-QString AndroidManagementPolicy::maximumTimeToLock() const
+QString EnterprisePolicy::name() const
 {
-    return m_data[QLatin1String("maximumTimeToLock")].toString();
+    return m_data[u"name"].toString();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setMaximumTimeToLock(qint64 value)
+QString EnterprisePolicy::version() const
 {
-    m_data[QLatin1String("maximumTimeToLock")] = QString::number(value);
+    return m_data[u"version"].toString();
+}
+
+QString EnterprisePolicy::maximumTimeToLock() const
+{
+    return m_data[u"maximumTimeToLock"].toString();
+}
+
+EnterprisePolicy &EnterprisePolicy::setMaximumTimeToLock(qint64 value)
+{
+    m_data[u"maximumTimeToLock"] = QString::number(value);
     return *this;
 }
 
-bool AndroidManagementPolicy::screenCaptureDisabled() const
+bool EnterprisePolicy::screenCaptureDisabled() const
 {
-    return m_data[QLatin1String("screenCaptureDisabled")].toBool();
+    return m_data[u"screenCaptureDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setScreenCaptureDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setScreenCaptureDisabled(bool value)
 {
-    m_data[QLatin1String("screenCaptureDisabled")] = value;
+    m_data[u"screenCaptureDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::cameraDisabled() const
+bool EnterprisePolicy::cameraDisabled() const
 {
-    return m_data[QLatin1String("cameraDisabled")].toBool();
+    return m_data[u"cameraDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setCameraDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setCameraDisabled(bool value)
 {
-    m_data[QLatin1String("cameraDisabled")] = value;
+    m_data[u"cameraDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::addUserDisabled() const
+bool EnterprisePolicy::addUserDisabled() const
 {
-    return m_data[QLatin1String("addUserDisabled")].toBool();
+    return m_data[u"addUserDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setAddUserDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setAddUserDisabled(bool value)
 {
-    m_data[QLatin1String("addUserDisabled")] = value;
+    m_data[u"addUserDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::adjustVolumeDisabled() const
+bool EnterprisePolicy::adjustVolumeDisabled() const
 {
-    return m_data[QLatin1String("adjustVolumeDisabled")].toBool();
+    return m_data[u"adjustVolumeDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setAdjustVolumeDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setAdjustVolumeDisabled(bool value)
 {
-    m_data[QLatin1String("adjustVolumeDisabled")] = value;
+    m_data[u"adjustVolumeDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::factoryResetDisabled() const
+bool EnterprisePolicy::factoryResetDisabled() const
 {
-    return m_data[QLatin1String("factoryResetDisabled")].toBool();
+    return m_data[u"factoryResetDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setFactoryResetDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setFactoryResetDisabled(bool value)
 {
-    m_data[QLatin1String("factoryResetDisabled")] = value;
+    m_data[u"factoryResetDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::installAppsDisabled() const
+bool EnterprisePolicy::installAppsDisabled() const
 {
-    return m_data[QLatin1String("installAppsDisabled")].toBool();
+    return m_data[u"installAppsDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setInstallAppsDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setInstallAppsDisabled(bool value)
 {
-    m_data[QLatin1String("installAppsDisabled")] = value;
+    m_data[u"installAppsDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::mountPhysicalMediaDisabled() const
+bool EnterprisePolicy::mountPhysicalMediaDisabled() const
 {
-    return m_data[QLatin1String("mountPhysicalMediaDisabled")].toBool();
+    return m_data[u"mountPhysicalMediaDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setMountPhysicalMediaDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setMountPhysicalMediaDisabled(bool value)
 {
-    m_data[QLatin1String("mountPhysicalMediaDisabled")] = value;
+    m_data[u"mountPhysicalMediaDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::modifyAccountsDisabled() const
+bool EnterprisePolicy::modifyAccountsDisabled() const
 {
-    return m_data[QLatin1String("modifyAccountsDisabled")].toBool();
+    return m_data[u"modifyAccountsDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setModifyAccountsDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setModifyAccountsDisabled(bool value)
 {
-    m_data[QLatin1String("modifyAccountsDisabled")] = value;
+    m_data[u"modifyAccountsDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::safeBootDisabled() const
+bool EnterprisePolicy::safeBootDisabled() const
 {
-    return m_data[QLatin1String("safeBootDisabled")].toBool();
+    return m_data[u"safeBootDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setSafeBootDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setSafeBootDisabled(bool value)
 {
-    m_data[QLatin1String("safeBootDisabled")] = value;
+    m_data[u"safeBootDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::uninstallAppsDisabled() const
+bool EnterprisePolicy::uninstallAppsDisabled() const
 {
-    return m_data[QLatin1String("uninstallAppsDisabled")].toBool();
+    return m_data[u"uninstallAppsDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setUninstallAppsDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setUninstallAppsDisabled(bool value)
 {
-    m_data[QLatin1String("uninstallAppsDisabled")] = value;
+    m_data[u"uninstallAppsDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::statusBarDisabled() const
+bool EnterprisePolicy::statusBarDisabled() const
 {
-    return m_data[QLatin1String("statusBarDisabled")].toBool();
+    return m_data[u"statusBarDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setStatusBarDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setStatusBarDisabled(bool value)
 {
-    m_data[QLatin1String("statusBarDisabled")] = value;
+    m_data[u"statusBarDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::keyguardDisabled() const
+bool EnterprisePolicy::keyguardDisabled() const
 {
-    return m_data[QLatin1String("keyguardDisabled")].toBool();
+    return m_data[u"keyguardDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setKeyguardDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setKeyguardDisabled(bool value)
 {
-    m_data[QLatin1String("keyguardDisabled")] = value;
+    m_data[u"keyguardDisabled"] = value;
     return *this;
 }
 
-int AndroidManagementPolicy::minimumApiLevel() const
+int EnterprisePolicy::minimumApiLevel() const
 {
-    return m_data[QLatin1String("minimumApiLevel")].toBool();
+    return m_data[u"minimumApiLevel"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setMinimumApiLevel(int value)
+EnterprisePolicy &EnterprisePolicy::setMinimumApiLevel(int value)
 {
-    m_data[QLatin1String("minimumApiLevel")] = value;
+    m_data[u"minimumApiLevel"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::bluetoothContactSharingDisabled() const
+bool EnterprisePolicy::bluetoothContactSharingDisabled() const
 {
-    return m_data[QLatin1String("bluetoothContactSharingDisabled")].toBool();
+    return m_data[u"bluetoothContactSharingDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setBluetoothContactSharingDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setBluetoothContactSharingDisabled(bool value)
 {
-    m_data[QLatin1String("bluetoothContactSharingDisabled")] = value;
+    m_data[u"bluetoothContactSharingDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::wifiConfigsLockdownEnabled() const
+bool EnterprisePolicy::wifiConfigsLockdownEnabled() const
 {
-    return m_data[QLatin1String("wifiConfigsLockdownEnabled")].toBool();
+    return m_data[u"wifiConfigsLockdownEnabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setWifiConfigsLockdownEnabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setWifiConfigsLockdownEnabled(bool value)
 {
-    m_data[QLatin1String("wifiConfigsLockdownEnabled")] = value;
+    m_data[u"wifiConfigsLockdownEnabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::bluetoothConfigDisabled() const
+bool EnterprisePolicy::bluetoothConfigDisabled() const
 {
-    return m_data[QLatin1String("bluetoothConfigDisabled")].toBool();
+    return m_data[u"bluetoothConfigDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setBluetoothConfigDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setBluetoothConfigDisabled(bool value)
 {
-    m_data[QLatin1String("bluetoothConfigDisabled")] = value;
+    m_data[u"bluetoothConfigDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::cellBroadcastsConfigDisabled() const
+bool EnterprisePolicy::cellBroadcastsConfigDisabled() const
 {
-    return m_data[QLatin1String("cellBroadcastsConfigDisabled")].toBool();
+    return m_data[u"cellBroadcastsConfigDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setCellBroadcastsConfigDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setCellBroadcastsConfigDisabled(bool value)
 {
-    m_data[QLatin1String("cellBroadcastsConfigDisabled")] = value;
+    m_data[u"cellBroadcastsConfigDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::credentialsConfigDisabled() const
+bool EnterprisePolicy::credentialsConfigDisabled() const
 {
-    return m_data[QLatin1String("credentialsConfigDisabled")].toBool();
+    return m_data[u"credentialsConfigDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setCredentialsConfigDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setCredentialsConfigDisabled(bool value)
 {
-    m_data[QLatin1String("credentialsConfigDisabled")] = value;
+    m_data[u"credentialsConfigDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::mobileNetworksConfigDisabled() const
+bool EnterprisePolicy::mobileNetworksConfigDisabled() const
 {
-    return m_data[QLatin1String("mobileNetworksConfigDisabled")].toBool();
+    return m_data[u"mobileNetworksConfigDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setMobileNetworksConfigDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setMobileNetworksConfigDisabled(bool value)
 {
-    m_data[QLatin1String("mobileNetworksConfigDisabled")] = value;
+    m_data[u"mobileNetworksConfigDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::tetheringConfigDisabled() const
+bool EnterprisePolicy::tetheringConfigDisabled() const
 {
-    return m_data[QLatin1String("tetheringConfigDisabled")].toBool();
+    return m_data[u"tetheringConfigDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setTetheringConfigDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setTetheringConfigDisabled(bool value)
 {
-    m_data[QLatin1String("tetheringConfigDisabled")] = value;
+    m_data[u"tetheringConfigDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::vpnConfigDisabled() const
+bool EnterprisePolicy::vpnConfigDisabled() const
 {
-    return m_data[QLatin1String("vpnConfigDisabled")].toBool();
+    return m_data[u"vpnConfigDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setVpnConfigDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setVpnConfigDisabled(bool value)
 {
-    m_data[QLatin1String("vpnConfigDisabled")] = value;
+    m_data[u"vpnConfigDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::wifiConfigDisabled() const
+bool EnterprisePolicy::wifiConfigDisabled() const
 {
-    return m_data[QLatin1String("wifiConfigDisabled")].toBool();
+    return m_data[u"wifiConfigDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setWifiConfigDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setWifiConfigDisabled(bool value)
 {
-    m_data[QLatin1String("wifiConfigDisabled")] = value;
+    m_data[u"wifiConfigDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::createWindowsDisabled() const
+bool EnterprisePolicy::createWindowsDisabled() const
 {
-    return m_data[QLatin1String("createWindowsDisabled")].toBool();
+    return m_data[u"createWindowsDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setCreateWindowsDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setCreateWindowsDisabled(bool value)
 {
-    m_data[QLatin1String("createWindowsDisabled")] = value;
+    m_data[u"createWindowsDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::networkResetDisabled() const
+bool EnterprisePolicy::networkResetDisabled() const
 {
-    return m_data[QLatin1String("networkResetDisabled")].toBool();
+    return m_data[u"networkResetDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setNetworkResetDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setNetworkResetDisabled(bool value)
 {
-    m_data[QLatin1String("networkResetDisabled")] = value;
+    m_data[u"networkResetDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::outgoingBeamDisabled() const
+bool EnterprisePolicy::outgoingBeamDisabled() const
 {
-    return m_data[QLatin1String("outgoingBeamDisabled")].toBool();
+    return m_data[u"outgoingBeamDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setOutgoingBeamDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setOutgoingBeamDisabled(bool value)
 {
-    m_data[QLatin1String("outgoingBeamDisabled")] = value;
+    m_data[u"outgoingBeamDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::outgoingCallsDisabled() const
+bool EnterprisePolicy::outgoingCallsDisabled() const
 {
-    return m_data[QLatin1String("outgoingCallsDisabled")].toBool();
+    return m_data[u"outgoingCallsDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setOutgoingCallsDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setOutgoingCallsDisabled(bool value)
 {
-    m_data[QLatin1String("outgoingCallsDisabled")] = value;
+    m_data[u"outgoingCallsDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::removeUserDisabled() const
+bool EnterprisePolicy::removeUserDisabled() const
 {
-    return m_data[QLatin1String("removeUserDisabled")].toBool();
+    return m_data[u"removeUserDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setRemoveUserDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setRemoveUserDisabled(bool value)
 {
-    m_data[QLatin1String("removeUserDisabled")] = value;
+    m_data[u"removeUserDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::shareLocationDisabled() const
+bool EnterprisePolicy::shareLocationDisabled() const
 {
-    return m_data[QLatin1String("shareLocationDisabled")].toBool();
+    return m_data[u"shareLocationDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setShareLocationDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setShareLocationDisabled(bool value)
 {
-    m_data[QLatin1String("shareLocationDisabled")] = value;
+    m_data[u"shareLocationDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::smsDisabled() const
+bool EnterprisePolicy::smsDisabled() const
 {
-    return m_data[QLatin1String("smsDisabled")].toBool();
+    return m_data[u"smsDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setSmsDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setSmsDisabled(bool value)
 {
-    m_data[QLatin1String("smsDisabled")] = value;
+    m_data[u"smsDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::unmuteMicrophoneDisabled() const
+bool EnterprisePolicy::unmuteMicrophoneDisabled() const
 {
-    return m_data[QLatin1String("unmuteMicrophoneDisabled")].toBool();
+    return m_data[u"unmuteMicrophoneDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setUnmuteMicrophoneDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setUnmuteMicrophoneDisabled(bool value)
 {
-    m_data[QLatin1String("unmuteMicrophoneDisabled")] = value;
+    m_data[u"unmuteMicrophoneDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::usbFileTransferDisabled() const
+bool EnterprisePolicy::usbFileTransferDisabled() const
 {
-    return m_data[QLatin1String("usbFileTransferDisabled")].toBool();
+    return m_data[u"usbFileTransferDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setUsbFileTransferDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setUsbFileTransferDisabled(bool value)
 {
-    m_data[QLatin1String("usbFileTransferDisabled")] = value;
+    m_data[u"usbFileTransferDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::ensureVerifyAppsEnabled() const
+bool EnterprisePolicy::ensureVerifyAppsEnabled() const
 {
-    return m_data[QLatin1String("ensureVerifyAppsEnabled")].toBool();
+    return m_data[u"ensureVerifyAppsEnabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setEnsureVerifyAppsEnabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setEnsureVerifyAppsEnabled(bool value)
 {
-    m_data[QLatin1String("ensureVerifyAppsEnabled")] = value;
+    m_data[u"ensureVerifyAppsEnabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::setUserIconDisabled() const
+bool EnterprisePolicy::setUserIconDisabled() const
 {
-    return m_data[QLatin1String("setUserIconDisabled")].toBool();
+    return m_data[u"setUserIconDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setUserIconDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setUserIconDisabled(bool value)
 {
-    m_data[QLatin1String("setUserIconDisabled")] = value;
+    m_data[u"setUserIconDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::setWallpaperDisabled() const
+bool EnterprisePolicy::setWallpaperDisabled() const
 {
-    return m_data[QLatin1String("setWallpaperDisabled")].toBool();
+    return m_data[u"setWallpaperDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setWallpaperDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setWallpaperDisabled(bool value)
 {
-    m_data[QLatin1String("setWallpaperDisabled")] = value;
+    m_data[u"setWallpaperDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::dataRoamingDisabled() const
+bool EnterprisePolicy::dataRoamingDisabled() const
 {
-    return m_data[QLatin1String("dataRoamingDisabled")].toBool();
+    return m_data[u"dataRoamingDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setDataRoamingDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setDataRoamingDisabled(bool value)
 {
-    m_data[QLatin1String("dataRoamingDisabled")] = value;
+    m_data[u"dataRoamingDisabled"] = value;
     return *this;
 }
 
-AndroidManagementPolicy::LocationMode AndroidManagementPolicy::locationMode() const
+EnterprisePolicy::LocationMode EnterprisePolicy::locationMode() const
 {
-    const QString mode = m_data[QLatin1String("locationMode")].toString();
+    const QString mode = m_data[u"locationMode"].toString();
     const int idx = staticMetaObject.indexOfEnumerator("LocationMode");
     if (idx != -1) {
         QMetaEnum me = staticMetaObject.enumerator(idx);
-        return static_cast<AndroidManagementPolicy::LocationMode>(me.keyToValue(mode.toLatin1().constData()));
+        return static_cast<EnterprisePolicy::LocationMode>(me.keyToValue(mode.toLatin1().constData()));
     }
     return LOCATION_MODE_UNSPECIFIED;
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setLocationMode(AndroidManagementPolicy::LocationMode value)
+EnterprisePolicy &EnterprisePolicy::setLocationMode(EnterprisePolicy::LocationMode value)
 {
     const int idx = staticMetaObject.indexOfEnumerator("LocationMode");
     if (idx != -1) {
         QMetaEnum me = staticMetaObject.enumerator(idx);
-        m_data[QLatin1String("locationMode")] = QString::fromLatin1(me.valueToKey(value));
+        m_data[u"locationMode"] = QString::fromLatin1(me.valueToKey(value));
     }
     return *this;
 }
 
-bool AndroidManagementPolicy::networkEscapeHatchEnabled() const
+bool EnterprisePolicy::networkEscapeHatchEnabled() const
 {
-    return m_data[QLatin1String("networkEscapeHatchEnabled")].toBool();
+    return m_data[u"networkEscapeHatchEnabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setNetworkEscapeHatchEnabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setNetworkEscapeHatchEnabled(bool value)
 {
-    m_data[QLatin1String("networkEscapeHatchEnabled")] = value;
+    m_data[u"networkEscapeHatchEnabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::bluetoothDisabled() const
+bool EnterprisePolicy::bluetoothDisabled() const
 {
-    return m_data[QLatin1String("bluetoothDisabled")].toBool();
+    return m_data[u"bluetoothDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setBluetoothDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setBluetoothDisabled(bool value)
 {
-    m_data[QLatin1String("bluetoothDisabled")] = value;
+    m_data[u"bluetoothDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::blockApplicationsEnabled() const
+bool EnterprisePolicy::blockApplicationsEnabled() const
 {
-    return m_data[QLatin1String("blockApplicationsEnabled")].toBool();
+    return m_data[u"blockApplicationsEnabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setBlockApplicationsEnabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setBlockApplicationsEnabled(bool value)
 {
-    m_data[QLatin1String("blockApplicationsEnabled")] = value;
+    m_data[u"blockApplicationsEnabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::installUnknownSourcesAllowed() const
+bool EnterprisePolicy::installUnknownSourcesAllowed() const
 {
-    return m_data[QLatin1String("installUnknownSourcesAllowed")].toBool();
+    return m_data[u"installUnknownSourcesAllowed"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setInstallUnknownSourcesAllowed(bool value)
+EnterprisePolicy &EnterprisePolicy::setInstallUnknownSourcesAllowed(bool value)
 {
-    m_data[QLatin1String("installUnknownSourcesAllowed")] = value;
+    m_data[u"installUnknownSourcesAllowed"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::debuggingFeaturesAllowed() const
+bool EnterprisePolicy::debuggingFeaturesAllowed() const
 {
-    return m_data[QLatin1String("debuggingFeaturesAllowed")].toBool();
+    return m_data[u"debuggingFeaturesAllowed"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setDebuggingFeaturesAllowed(bool value)
+EnterprisePolicy &EnterprisePolicy::setDebuggingFeaturesAllowed(bool value)
 {
-    m_data[QLatin1String("debuggingFeaturesAllowed")] = value;
+    m_data[u"debuggingFeaturesAllowed"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::funDisabled() const
+bool EnterprisePolicy::funDisabled() const
 {
-    return m_data[QLatin1String("funDisabled")].toBool();
+    return m_data[u"funDisabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setFunDisabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setFunDisabled(bool value)
 {
-    m_data[QLatin1String("funDisabled")] = value;
+    m_data[u"funDisabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::autoTimeRequired() const
+bool EnterprisePolicy::autoTimeRequired() const
 {
-    return m_data[QLatin1String("autoTimeRequired")].toBool();
+    return m_data[u"autoTimeRequired"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setAutoTimeRequired(bool value)
+EnterprisePolicy &EnterprisePolicy::setAutoTimeRequired(bool value)
 {
-    m_data[QLatin1String("autoTimeRequired")] = value;
+    m_data[u"autoTimeRequired"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::kioskCustomLauncherEnabled() const
+bool EnterprisePolicy::kioskCustomLauncherEnabled() const
 {
-    return m_data[QLatin1String("kioskCustomLauncherEnabled")].toBool();
+    return m_data[u"kioskCustomLauncherEnabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setKioskCustomLauncherEnabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setKioskCustomLauncherEnabled(bool value)
 {
-    m_data[QLatin1String("kioskCustomLauncherEnabled")] = value;
+    m_data[u"kioskCustomLauncherEnabled"] = value;
     return *this;
 }
 
-bool AndroidManagementPolicy::skipFirstUseHintsEnabled() const
+bool EnterprisePolicy::skipFirstUseHintsEnabled() const
 {
-    return m_data[QLatin1String("skipFirstUseHintsEnabled")].toBool();
+    return m_data[u"skipFirstUseHintsEnabled"].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setSkipFirstUseHintsEnabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setSkipFirstUseHintsEnabled(bool value)
 {
-    m_data[QLatin1String("skipFirstUseHintsEnabled")] = value;
+    m_data[u"skipFirstUseHintsEnabled"] = value;
     return *this;
 }
 
-const static auto s_privateKeySelectionEnabled = QLatin1String("privateKeySelectionEnabled");
-bool AndroidManagementPolicy::privateKeySelectionEnabled() const
+const static auto s_privateKeySelectionEnabled = u"privateKeySelectionEnabled";
+bool EnterprisePolicy::privateKeySelectionEnabled() const
 {
     return m_data[s_privateKeySelectionEnabled].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setPrivateKeySelectionEnabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setPrivateKeySelectionEnabled(bool value)
 {
     m_data[s_privateKeySelectionEnabled] = value;
     return *this;
 }
 
-const static auto s_usbMassStorageEnabled = QLatin1String("usbMassStorageEnabled");
-bool AndroidManagementPolicy::usbMassStorageEnabled() const
+const static auto s_usbMassStorageEnabled = u"usbMassStorageEnabled";
+bool EnterprisePolicy::usbMassStorageEnabled() const
 {
     return m_data[s_usbMassStorageEnabled].toBool();
 }
 
-AndroidManagementPolicy &AndroidManagementPolicy::setUsbMassStorageEnabled(bool value)
+EnterprisePolicy &EnterprisePolicy::setUsbMassStorageEnabled(bool value)
 {
     m_data[s_usbMassStorageEnabled] = value;
     return *this;
 }
 
-QString AndroidManagementPolicy::updateMask(const AndroidManagementPolicy &other)
+QString EnterprisePolicy::updateMask(const EnterprisePolicy &other)
 {
     QStringList ret;
     QJsonObject otherObj = other.data();
@@ -591,7 +608,12 @@ QString AndroidManagementPolicy::updateMask(const AndroidManagementPolicy &other
     return ret.join(QLatin1Char(','));
 }
 
-QJsonObject AndroidManagementPolicy::data() const
+QJsonObject EnterprisePolicy::data() const
 {
     return m_data;
+}
+
+void EnterprisePolicy::operator=(const EnterprisePolicy &other)
+{
+    m_data = other.m_data;
 }

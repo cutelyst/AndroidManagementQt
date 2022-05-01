@@ -22,6 +22,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Network REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} 5.12.0 COMPONENTS Core Network REQUIRED)
+set(CMAKE_AUTOMOC ON)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -78,24 +79,24 @@ include_directories(
 )
 
 # cmake config files
-configure_file(${CMAKE_MODULE_PATH}/android-management-config.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/AndroidManagementQt${QT_VERSION_MAJOR}Config.cmake
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/android-management-config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/AndroidManagement${PROJECT_VERSION_MAJOR}Qt${QT_VERSION_MAJOR}Config.cmake
     @ONLY
 )
-configure_file(${CMAKE_MODULE_PATH}/android-management-config-version.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/AndroidManagementQt${QT_VERSION_MAJOR}ConfigVersion.cmake
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/android-management-config-version.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/AndroidManagement${PROJECT_VERSION_MAJOR}Qt${QT_VERSION_MAJOR}ConfigVersion.cmake
     @ONLY
 )
 install(
     FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/AndroidManagementQt${QT_VERSION_MAJOR}Config.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/AndroidManagementQt${QT_VERSION_MAJOR}ConfigVersion.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/AndroidManagement${PROJECT_VERSION_MAJOR}Qt${QT_VERSION_MAJOR}Config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/AndroidManagement${PROJECT_VERSION_MAJOR}Qt${QT_VERSION_MAJOR}ConfigVersion.cmake
     DESTINATION
-    ${CMAKE_INSTALL_LIBDIR}/cmake/AndroidManagementQt${QT_VERSION_MAJOR}/
+    ${CMAKE_INSTALL_LIBDIR}/cmake/AndroidManagement${PROJECT_VERSION_MAJOR}Qt${QT_VERSION_MAJOR}/
 )
 
 install(EXPORT AndroidManagementTargets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/AndroidManagementQt${QT_VERSION_MAJOR}/
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/AndroidManagement${PROJECT_VERSION_MAJOR}Qt${QT_VERSION_MAJOR}/
     FILE AndroidManagement${PROJECT_VERSION_MAJOR}Qt${QT_VERSION_MAJOR}Targets.cmake
     NAMESPACE AndroidManagementQt::
     COMPONENT Devel

@@ -8,6 +8,7 @@ set(android_management_SRC
 )
 
 set(android_management_HEADERS
+    androidmanagementexports.h
     androidmanagement.h
     androidmanagementpolicy.h
     googlecloudoauth2.h
@@ -47,9 +48,10 @@ set_target_properties(AndroidManagementQt${QT_VERSION_MAJOR} PROPERTIES
 )
 
 target_link_libraries(AndroidManagementQt${QT_VERSION_MAJOR}
+    PUBLIC
+        Qt${QT_VERSION_MAJOR}::Network
     PRIVATE
         Qt${QT_VERSION_MAJOR}::Core
-        Qt${QT_VERSION_MAJOR}::Network
         jwt-cpp::jwt-cpp
 )
 

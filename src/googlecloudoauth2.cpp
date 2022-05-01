@@ -64,7 +64,7 @@ QNetworkAccessManager *GoogleCloudOAuth2::networkAccessManager() const
 
 void GoogleCloudOAuth2::setNetworkAccessManager(QNetworkAccessManager *nam)
 {
-    if (m_nam) {
+    if (m_nam && m_nam->parent() == this) {
         delete m_nam;
     }
     m_nam = nam;
@@ -92,15 +92,15 @@ void GoogleCloudOAuth2::setScopes(const QStringList &scopes)
 
 void GoogleCloudOAuth2::getAccessToken()
 {
-    const QString tokenUri = m_credentialsFile[QLatin1String("token_uri")].toString();
-    const QString privateKey = m_credentialsFile[QLatin1String("private_key")].toString();
+    const QString tokenUri = m_credentialsFile[u"token_uri"].toString();
+    const QString privateKey = m_credentialsFile[u"private_key"].toString();
 
     try {
         auto algo = jwt::algorithm::rs256{std::string(), privateKey.toStdString()};
 
         auto token = jwt::create()
                 .set_type("JWT")
-                .set_issuer(m_credentialsFile[QLatin1String("client_email")].toString().toStdString())
+                .set_issuer(m_credentialsFile[u"client_email"].toString().toStdString())
                 .set_payload_claim("scope", jwt::claim(m_scopes.join(QLatin1Char(' ')).toStdString()))
                 .set_audience(tokenUri.toStdString())
                 .set_issued_at(std::chrono::system_clock::now())
@@ -117,6 +117,7 @@ void GoogleCloudOAuth2::getAccessToken()
         QNetworkReply *reply = m_nam->post(req, query.toString(QUrl::FullyEncoded).toLatin1());
         connect(reply, &QNetworkReply::finished, this, [=] {
             reply->deleteLater();
+
             const QByteArray data = reply->readAll();
             m_token = QJsonObject();
             m_accessTokenHeader.clear();
@@ -128,7 +129,7 @@ void GoogleCloudOAuth2::getAccessToken()
                 if (!error.error) {
                     m_token = doc.object();
                     m_accessTokenHeader = QByteArrayLiteral("Bearer ") + m_token.value(QStringLiteral("access_token")).toString().toLatin1();
-                    m_expires = m_token.value(QLatin1String("expires_in")).toInt() * 1000 - 30'000;
+                    m_expires = m_token.value(u"expires_in").toInt() * 1000 - 30'000;
                     m_expiresTimer.start();
                     qCDebug(GC_OAUTH) << "Got Access Token" << m_token;
                 } else {
@@ -174,3 +175,5 @@ void GoogleCloudOAuth2::getAccessToken(const QObject *receiver, std::function<vo
         }
     }
 }
+
+#include "moc_googlecloudoauth2.cpp"

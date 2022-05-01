@@ -12,13 +12,17 @@
 
 namespace AndroidManagementQt {
 
-class ANDROID_MANAGEMENT_QT_EXPORT AndroidManagementPolicy
+class GoogleCloudReply;
+class ANDROID_MANAGEMENT_QT_EXPORT EnterprisePolicy
 {
     Q_GADGET
 public:
-    AndroidManagementPolicy();
-    AndroidManagementPolicy(const AndroidManagementPolicy &other);
-    AndroidManagementPolicy(const QJsonObject &data);
+    EnterprisePolicy();
+    EnterprisePolicy(const EnterprisePolicy &other);
+    EnterprisePolicy(const QJsonObject &data);
+    EnterprisePolicy(const GoogleCloudReply &data);
+
+    static QList<EnterprisePolicy> policiesFromReply(const GoogleCloudReply &data);
 
     /*!
      * The name of the policy in the form enterprises/{enterpriseId}/policies/{policyId}.
@@ -41,103 +45,103 @@ public:
      * Maximum time in milliseconds (int64) for user activity until the device locks.
      * A value of 0 means there is no restriction.
      */
-    AndroidManagementPolicy &setMaximumTimeToLock(qint64 value);
+    EnterprisePolicy &setMaximumTimeToLock(qint64 value);
 
     bool screenCaptureDisabled() const;
-    AndroidManagementPolicy &setScreenCaptureDisabled(bool value);
+    EnterprisePolicy &setScreenCaptureDisabled(bool value);
 
     bool cameraDisabled() const;
-    AndroidManagementPolicy &setCameraDisabled(bool value);
+    EnterprisePolicy &setCameraDisabled(bool value);
 
     bool addUserDisabled() const;
-    AndroidManagementPolicy &setAddUserDisabled(bool value);
+    EnterprisePolicy &setAddUserDisabled(bool value);
 
     bool adjustVolumeDisabled() const;
-    AndroidManagementPolicy &setAdjustVolumeDisabled(bool value);
+    EnterprisePolicy &setAdjustVolumeDisabled(bool value);
 
     bool factoryResetDisabled() const;
-    AndroidManagementPolicy &setFactoryResetDisabled(bool value);
+    EnterprisePolicy &setFactoryResetDisabled(bool value);
 
     bool installAppsDisabled() const;
-    AndroidManagementPolicy &setInstallAppsDisabled(bool value);
+    EnterprisePolicy &setInstallAppsDisabled(bool value);
 
     bool mountPhysicalMediaDisabled() const;
-    AndroidManagementPolicy &setMountPhysicalMediaDisabled(bool value);
+    EnterprisePolicy &setMountPhysicalMediaDisabled(bool value);
 
     bool modifyAccountsDisabled() const;
-    AndroidManagementPolicy &setModifyAccountsDisabled(bool value);
+    EnterprisePolicy &setModifyAccountsDisabled(bool value);
 
     bool safeBootDisabled() const;
-    AndroidManagementPolicy &setSafeBootDisabled(bool value);
+    EnterprisePolicy &setSafeBootDisabled(bool value);
 
     bool uninstallAppsDisabled() const;
-    AndroidManagementPolicy &setUninstallAppsDisabled(bool value);
+    EnterprisePolicy &setUninstallAppsDisabled(bool value);
 
     [[deprecated]] bool statusBarDisabled() const;
-    [[deprecated]] AndroidManagementPolicy &setStatusBarDisabled(bool value);
+    [[deprecated]] EnterprisePolicy &setStatusBarDisabled(bool value);
 
     bool keyguardDisabled() const;
-    AndroidManagementPolicy &setKeyguardDisabled(bool value);
+    EnterprisePolicy &setKeyguardDisabled(bool value);
 
     int minimumApiLevel() const;
-    AndroidManagementPolicy &setMinimumApiLevel(int value);
+    EnterprisePolicy &setMinimumApiLevel(int value);
 
     bool bluetoothContactSharingDisabled() const;
-    AndroidManagementPolicy &setBluetoothContactSharingDisabled(bool value);
+    EnterprisePolicy &setBluetoothContactSharingDisabled(bool value);
 
     [[deprecated]] bool wifiConfigsLockdownEnabled() const;
-    [[deprecated]] AndroidManagementPolicy &setWifiConfigsLockdownEnabled(bool value);
+    [[deprecated]] EnterprisePolicy &setWifiConfigsLockdownEnabled(bool value);
 
     bool bluetoothConfigDisabled() const;
-    AndroidManagementPolicy &setBluetoothConfigDisabled(bool value);
+    EnterprisePolicy &setBluetoothConfigDisabled(bool value);
 
     bool cellBroadcastsConfigDisabled() const;
-    AndroidManagementPolicy &setCellBroadcastsConfigDisabled(bool value);
+    EnterprisePolicy &setCellBroadcastsConfigDisabled(bool value);
 
     bool credentialsConfigDisabled() const;
-    AndroidManagementPolicy &setCredentialsConfigDisabled(bool value);
+    EnterprisePolicy &setCredentialsConfigDisabled(bool value);
 
     bool mobileNetworksConfigDisabled() const;
-    AndroidManagementPolicy &setMobileNetworksConfigDisabled(bool value);
+    EnterprisePolicy &setMobileNetworksConfigDisabled(bool value);
 
     bool tetheringConfigDisabled() const;
-    AndroidManagementPolicy &setTetheringConfigDisabled(bool value);
+    EnterprisePolicy &setTetheringConfigDisabled(bool value);
 
     bool vpnConfigDisabled() const;
-    AndroidManagementPolicy &setVpnConfigDisabled(bool value);
+    EnterprisePolicy &setVpnConfigDisabled(bool value);
 
     bool wifiConfigDisabled() const;
-    AndroidManagementPolicy &setWifiConfigDisabled(bool value);
+    EnterprisePolicy &setWifiConfigDisabled(bool value);
 
     bool createWindowsDisabled() const;
-    AndroidManagementPolicy &setCreateWindowsDisabled(bool value);
+    EnterprisePolicy &setCreateWindowsDisabled(bool value);
 
     bool networkResetDisabled() const;
-    AndroidManagementPolicy &setNetworkResetDisabled(bool value);
+    EnterprisePolicy &setNetworkResetDisabled(bool value);
 
     bool outgoingBeamDisabled() const;
-    AndroidManagementPolicy &setOutgoingBeamDisabled(bool value);
+    EnterprisePolicy &setOutgoingBeamDisabled(bool value);
 
     bool outgoingCallsDisabled() const;
-    AndroidManagementPolicy &setOutgoingCallsDisabled(bool value);
+    EnterprisePolicy &setOutgoingCallsDisabled(bool value);
 
     bool removeUserDisabled() const;
-    AndroidManagementPolicy &setRemoveUserDisabled(bool value);
+    EnterprisePolicy &setRemoveUserDisabled(bool value);
 
     bool shareLocationDisabled() const;
-    AndroidManagementPolicy &setShareLocationDisabled(bool value);
+    EnterprisePolicy &setShareLocationDisabled(bool value);
 
     bool smsDisabled() const;
-    AndroidManagementPolicy &setSmsDisabled(bool value);
+    EnterprisePolicy &setSmsDisabled(bool value);
 
     bool unmuteMicrophoneDisabled() const;
-    AndroidManagementPolicy &setUnmuteMicrophoneDisabled(bool value);
+    EnterprisePolicy &setUnmuteMicrophoneDisabled(bool value);
 
     bool usbFileTransferDisabled() const;
-    AndroidManagementPolicy &setUsbFileTransferDisabled(bool value);
+    EnterprisePolicy &setUsbFileTransferDisabled(bool value);
 
     bool ensureVerifyAppsEnabled() const;
-    AndroidManagementPolicy &setEnsureVerifyAppsEnabled(bool value);
+    EnterprisePolicy &setEnsureVerifyAppsEnabled(bool value);
 
     /*!
      * Whether changing the user icon is disabled.
@@ -147,7 +151,7 @@ public:
     /*!
      * Whether changing the user icon is disabled.
      */
-    AndroidManagementPolicy &setUserIconDisabled(bool value);
+    EnterprisePolicy &setUserIconDisabled(bool value);
 
     /*!
      * Whether changing the wallpaper is disabled.
@@ -157,10 +161,10 @@ public:
     /*!
      * Whether changing the wallpaper is disabled.
      */
-    AndroidManagementPolicy &setWallpaperDisabled(bool value);
+    EnterprisePolicy &setWallpaperDisabled(bool value);
 
     bool dataRoamingDisabled() const;
-    AndroidManagementPolicy &setDataRoamingDisabled(bool value);
+    EnterprisePolicy &setDataRoamingDisabled(bool value);
 
     enum LocationMode {
         LOCATION_MODE_UNSPECIFIED,
@@ -172,44 +176,46 @@ public:
     Q_ENUM(LocationMode)
 
     LocationMode locationMode() const;
-    AndroidManagementPolicy &setLocationMode(LocationMode value);
+    EnterprisePolicy &setLocationMode(LocationMode value);
 
     bool networkEscapeHatchEnabled() const;
-    AndroidManagementPolicy &setNetworkEscapeHatchEnabled(bool value);
+    EnterprisePolicy &setNetworkEscapeHatchEnabled(bool value);
 
     bool bluetoothDisabled() const;
-    AndroidManagementPolicy &setBluetoothDisabled(bool value);
+    EnterprisePolicy &setBluetoothDisabled(bool value);
 
     [[deprecated]] bool blockApplicationsEnabled() const;
-    [[deprecated]] AndroidManagementPolicy &setBlockApplicationsEnabled(bool value);
+    [[deprecated]] EnterprisePolicy &setBlockApplicationsEnabled(bool value);
 
     bool installUnknownSourcesAllowed() const;
-    AndroidManagementPolicy &setInstallUnknownSourcesAllowed(bool value);
+    EnterprisePolicy &setInstallUnknownSourcesAllowed(bool value);
 
     bool debuggingFeaturesAllowed() const;
-    AndroidManagementPolicy &setDebuggingFeaturesAllowed(bool value);
+    EnterprisePolicy &setDebuggingFeaturesAllowed(bool value);
 
     bool funDisabled() const;
-    AndroidManagementPolicy &setFunDisabled(bool value);
+    EnterprisePolicy &setFunDisabled(bool value);
 
     bool autoTimeRequired() const;
-    AndroidManagementPolicy &setAutoTimeRequired(bool value);
+    EnterprisePolicy &setAutoTimeRequired(bool value);
 
     bool kioskCustomLauncherEnabled() const;
-    AndroidManagementPolicy &setKioskCustomLauncherEnabled(bool value);
+    EnterprisePolicy &setKioskCustomLauncherEnabled(bool value);
 
     bool skipFirstUseHintsEnabled() const;
-    AndroidManagementPolicy &setSkipFirstUseHintsEnabled(bool value);
+    EnterprisePolicy &setSkipFirstUseHintsEnabled(bool value);
 
     bool privateKeySelectionEnabled() const;
-    AndroidManagementPolicy &setPrivateKeySelectionEnabled(bool value);
+    EnterprisePolicy &setPrivateKeySelectionEnabled(bool value);
 
     [[deprecated]] bool usbMassStorageEnabled() const;
-    [[deprecated]] AndroidManagementPolicy &setUsbMassStorageEnabled(bool value);
+    [[deprecated]] EnterprisePolicy &setUsbMassStorageEnabled(bool value);
 
-    QString updateMask(const AndroidManagementPolicy &other = {});
+    QString updateMask(const EnterprisePolicy &other = {});
 
     QJsonObject data() const;
+
+    void operator=(const EnterprisePolicy &other);
 
 private:
     QJsonObject m_data;

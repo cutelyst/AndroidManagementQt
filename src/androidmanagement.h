@@ -19,41 +19,65 @@ class ANDROID_MANAGEMENT_QT_EXPORT AndroidManagement : public GoogleCloudOAuth2
 {
     Q_OBJECT
 public:
+    using ReplyCb = std::function<void(const GoogleCloudReply &)>;
     explicit AndroidManagement(QObject *parent = nullptr);
 
-    void createEnrollmentToken(const QObject *receiver, const QString &enterpriseId, const QJsonObject &enrollmentToken, std::function<void(const GoogleCloudReply &)> code);
+    /*!
+     * \brief Lists EMM-managed enterprises. Only BASIC fields are returned.
+     */
+    void getEnterprises(const QObject *receiver, ReplyCb code);
 
-    void deleteEnrollmentToken(const QObject *receiver, const QString &enterpriseId, const QString &enrollmentTokenId, std::function<void(const GoogleCloudReply &)> code);
+    void createEnterprise(const QObject *receiver, const QUrlQuery &query, const QJsonObject &enterprise, ReplyCb code);
 
-    void getDevice(const QObject *receiver, const QString &fullDeviceId, std::function<void(const GoogleCloudReply &)> code);
+    void getEnterprise(const QObject *receiver, const QString &name, ReplyCb code);
 
-    void getDevices(const QObject *receiver, const QString &enterpriseId, std::function<void(const GoogleCloudReply &)> code);
+    void patchEnterprise(const QObject *receiver, const QString &name, const QString &updateMask,  const QJsonObject &enterprise, ReplyCb code);
+    inline void patchEnterprise(const QObject *receiver, const QString &name, const QJsonObject &enterprise, ReplyCb code);
 
-    void patchDevice(const QObject *receiver, const QString &enterpriseId, const QString &deviceId, const QString &updateMask, const QJsonObject &device, std::function<void(const GoogleCloudReply &)> code);
+    void deleteEnterprise(const QObject *receiver, const QString &name, ReplyCb code);
 
-    void patchDevice(const QObject *receiver, const QString &fullDeviceId, const QString &updateMask, const QJsonObject &device, std::function<void(const GoogleCloudReply &)> code);
+    void createEnrollmentToken(const QObject *receiver, const QString &enterpriseId, const QJsonObject &enrollmentToken, ReplyCb code);
 
-    void issueCommandDevice(const QObject *receiver, const QString &enterpriseId, const QString &deviceId, const QJsonObject &command, std::function<void(const GoogleCloudReply &)> code);
+    void deleteEnrollmentToken(const QObject *receiver, const QString &enrollmentTokenId, ReplyCb code);
+    void deleteEnrollmentToken(const QObject *receiver, const QString &enterpriseId, const QString &enrollmentTokenId, ReplyCb code);
 
-    void issueCommandDevice(const QObject *receiver, const QString &fullDeviceId, const QJsonObject &command, std::function<void(const GoogleCloudReply &)> code);
+    void getDevice(const QObject *receiver, const QString &fullDeviceId, ReplyCb code);
 
-    void deleteDevice(const QObject *receiver, const QString &enterpriseId, const QString &deviceId, std::function<void(const GoogleCloudReply &)> code);
+    void getDevices(const QObject *receiver, const QString &enterpriseId, ReplyCb code);
 
-    void deleteDevice(const QObject *receiver, const QString &fullDeviceId, std::function<void(const GoogleCloudReply &)> code);
+    void patchDevice(const QObject *receiver, const QString &enterpriseId, const QString &deviceId, const QString &updateMask, const QJsonObject &device, ReplyCb code);
 
-    void getPolicies(const QObject *receiver, const QString &enterpriseId, std::function<void(const GoogleCloudReply &, const std::vector<AndroidManagementPolicy> &policies)> code);
+    void patchDevice(const QObject *receiver, const QString &fullDeviceId, const QString &updateMask, const QJsonObject &device, ReplyCb code);
 
-    void getPolicy(const QObject *receiver, const QString &enterpriseId, const QString &policyId, std::function<void(const GoogleCloudReply &, const AndroidManagementPolicy &policy)> code);
+    void issueCommandDevice(const QObject *receiver, const QString &enterpriseId, const QString &deviceId, const QJsonObject &command, ReplyCb code);
 
-    void patchPolicy(const QObject *receiver, const QString &enterpriseId, const QString &policyId, const QString &updateMask, const QJsonObject &policy, std::function<void(const GoogleCloudReply &)> code);
+    void issueCommandDevice(const QObject *receiver, const QString &fullDeviceId, const QJsonObject &command, ReplyCb code);
 
-    void deletePolicy(const QObject *receiver, const QString &enterpriseId, const QString &policyId, std::function<void(const GoogleCloudReply &)> code);
+    void deleteDevice(const QObject *receiver, const QString &enterpriseId, const QString &deviceId, ReplyCb code);
 
-    void deletePolicy(const QObject *receiver, const QString &fullPolicyId, std::function<void(const GoogleCloudReply &)> code);
+    void deleteDevice(const QObject *receiver, const QString &fullDeviceId, ReplyCb code);
+
+    void getPolicies(const QObject *receiver, const QString &enterpriseId, ReplyCb code);
+
+    void getPolicy(const QObject *receiver, const QString &enterpriseId, const QString &policyId, ReplyCb code);
+
+    void patchPolicy(const QObject *receiver, const QString &enterpriseId, const QString &policyId, const QString &updateMask, const QJsonObject &policy, ReplyCb code);
+    void patchPolicy(const QObject *receiver, const QString &policyName, const QString &updateMask, const QJsonObject &policy, ReplyCb code);
+
+    void deletePolicy(const QObject *receiver, const QString &enterpriseId, const QString &policyId, ReplyCb code);
+
+    void deletePolicy(const QObject *receiver, const QString &fullPolicyId, ReplyCb code);
 
 private:
+    void requestFinished(QNetworkReply *reply, ReplyCb code);
+
     QUrl m_service;
 };
+
+inline void AndroidManagement::patchEnterprise(const QObject *receiver, const QString &name, const QJsonObject &enterprise, ReplyCb code)
+{
+    patchEnterprise(receiver, name, {}, enterprise, code);
+}
 
 }
 

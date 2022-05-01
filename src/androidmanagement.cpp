@@ -24,7 +24,7 @@ AndroidManagement::AndroidManagement(QObject *parent) : GoogleCloudOAuth2(parent
               });
 }
 
-void AndroidManagement::createEnrollmentToken(const QObject *receiver, const QString &enterpriseId, const QJsonObject &enrollmentToken, std::function<void (const GoogleCloudReply &)> code)
+void AndroidManagement::getEnterprises(const QObject *receiver, ReplyCb code)
 {
     getAccessToken(receiver, [=] (const GoogleCloudReply &credential) {
         if (credential.error) {
@@ -33,35 +33,146 @@ void AndroidManagement::createEnrollmentToken(const QObject *receiver, const QSt
         }
 
         QUrl url = m_service;
-        url.setPath(QLatin1String("/v1/enterprises/") + enterpriseId + QLatin1String("/enrollmentTokens"));
+        url.setPath(QLatin1String("/v1/enterprises"));
+
+        url.setQuery(QUrlQuery{
+                         {QStringLiteral("projectId"), accountCredential()[u"project_id"].toString()},
+                     });
+
+        QNetworkRequest req = defaultRequest(url);
+        qDebug() << "list Enterprises" << url;
+        QNetworkReply *reply = m_nam->get(req);
+        connect(reply, &QNetworkReply::finished, receiver, [=] {
+            requestFinished(reply, code);
+        });
+    });
+}
+
+void AndroidManagement::createEnterprise(const QObject *receiver, const QUrlQuery &query, const QJsonObject &enterprise, ReplyCb code)
+{
+    getAccessToken(receiver, [=] (const GoogleCloudReply &credential) {
+        if (credential.error) {
+            code(credential);
+            return;
+        }
+
+        QUrl url = m_service;
+        url.setPath(QLatin1String("/v1/enterprises"));
+
+        QUrlQuery _query = query;
+        _query.addQueryItem(QStringLiteral("projectId"), accountCredential()[u"project_id"].toString());
+        url.setQuery(_query);
+
+        QNetworkRequest req = defaultRequest(url);
+        req.setHeader(QNetworkRequest::ContentTypeHeader, QByteArrayLiteral("application/json"));
+        qDebug() << "create enterprise" << url;
+        QNetworkReply *reply = m_nam->post(req, QJsonDocument(enterprise).toJson(QJsonDocument::Compact));
+        connect(reply, &QNetworkReply::finished, receiver, [=] {
+            requestFinished(reply, code);
+        });
+    });
+}
+
+void AndroidManagement::getEnterprise(const QObject *receiver, const QString &name, ReplyCb code)
+{
+    getAccessToken(receiver, [=] (const GoogleCloudReply &credential) {
+        if (credential.error) {
+            code(credential);
+            return;
+        }
+
+        QUrl url = m_service;
+        if (name.startsWith(u"enterprises/")) {
+            url.setPath(QLatin1String("/v1/") + name);
+        } else {
+            url.setPath(QLatin1String("/v1/enterprises/") + name);
+        }
+
+        QNetworkRequest req = defaultRequest(url);
+        qDebug() << "delete enterprise" << url;
+        QNetworkReply *reply = m_nam->get(req);
+        connect(reply, &QNetworkReply::finished, receiver, [=] {
+            requestFinished(reply, code);
+        });
+    });
+}
+
+void AndroidManagement::patchEnterprise(const QObject *receiver, const QString &name, const QString &updateMask, const QJsonObject &enterprise, ReplyCb code)
+{
+    getAccessToken(receiver, [=] (const GoogleCloudReply &accessToken) {
+        QUrl url = m_service;
+        if (name.startsWith(u"enterprises/")) {
+            url.setPath(QLatin1String("/v1/") + name);
+        } else {
+            url.setPath(QLatin1String("/v1/enterprises/") + name);
+        }
+
+        if (!updateMask.isEmpty()) {
+            url.setQuery(QUrlQuery{
+                             {QStringLiteral("updateMask"), updateMask},
+                         });
+        }
+
+        QNetworkRequest req = defaultRequest(url);
+        req.setHeader(QNetworkRequest::ContentTypeHeader, QByteArrayLiteral("application/json"));
+        qDebug() << "patch enterprise" << url << name;
+        QNetworkReply *reply = m_nam->sendCustomRequest(req, QByteArrayLiteral("PATCH"), QJsonDocument(enterprise).toJson(QJsonDocument::Compact));
+        connect(reply, &QNetworkReply::finished, receiver, [=] {
+            requestFinished(reply, code);
+        });
+    });
+}
+
+void AndroidManagement::deleteEnterprise(const QObject *receiver, const QString &enterprise, ReplyCb code)
+{
+    getAccessToken(receiver, [=] (const GoogleCloudReply &credential) {
+        if (credential.error) {
+            code(credential);
+            return;
+        }
+
+        QUrl url = m_service;
+        if (enterprise.startsWith(u"enterprises/")) {
+            url.setPath(QLatin1String("/v1/") + enterprise);
+        } else {
+            url.setPath(QLatin1String("/v1/enterprises/") + enterprise);
+        }
+
+        QNetworkRequest req = defaultRequest(url);
+        qDebug() << "delete enterprise" << url;
+        QNetworkReply *reply = m_nam->deleteResource(req);
+        connect(reply, &QNetworkReply::finished, receiver, [=] {
+            requestFinished(reply, code);
+        });
+    });
+}
+
+void AndroidManagement::createEnrollmentToken(const QObject *receiver, const QString &enterpriseId, const QJsonObject &enrollmentToken, ReplyCb code)
+{
+    getAccessToken(receiver, [=] (const GoogleCloudReply &credential) {
+        if (credential.error) {
+            code(credential);
+            return;
+        }
+
+        QUrl url = m_service;
+        if (enterpriseId.startsWith(u"enterprises/")) {
+            url.setPath(QLatin1String("/v1/") + enterpriseId + QLatin1String("/enrollmentTokens"));
+        } else {
+            url.setPath(QLatin1String("/v1/enterprises/") + enterpriseId + QLatin1String("/enrollmentTokens"));
+        }
 
         QNetworkRequest req = defaultRequest(url);
         req.setHeader(QNetworkRequest::ContentTypeHeader, QByteArrayLiteral("application/json"));
         qDebug() << "list devices" << url << enterpriseId;
         QNetworkReply *reply = m_nam->post(req, QJsonDocument(enrollmentToken).toJson(QJsonDocument::Compact));
         connect(reply, &QNetworkReply::finished, receiver, [=] {
-            const QByteArray data = reply->readAll();
-            GoogleCloudReply gcr;
-            qDebug() << "enrollmentTokens" << reply->error() << data;
-            if (!reply->error()) {
-                QJsonParseError error;
-                QJsonDocument doc = QJsonDocument::fromJson(data, &error);
-                if (!error.error) {
-                    gcr.data = doc.object();
-                    qDebug() << "got token" << doc.object();
-                } else {
-                    qWarning() << "Failed to parse google token file" << data << error.errorString();
-                }
-            } else {
-                qWarning() << "get token failed" << reply->error();
-            }
-
-            code(gcr);
+            requestFinished(reply, code);
         });
     });
 }
 
-void AndroidManagement::deleteEnrollmentToken(const QObject *receiver, const QString &enterpriseId, const QString &enrollmentTokenId, std::function<void (const GoogleCloudReply &)> code)
+void AndroidManagement::deleteEnrollmentToken(const QObject *receiver, const QString &enrollmentTokenId, ReplyCb code)
 {
     getAccessToken(receiver, [=] (const GoogleCloudReply &credential) {
         if (credential.error) {
@@ -70,31 +181,40 @@ void AndroidManagement::deleteEnrollmentToken(const QObject *receiver, const QSt
         }
 
         QUrl url = m_service;
-        url.setPath(QLatin1String("/v1/enterprises/") + enterpriseId + QLatin1String("/enrollmentTokens/") + enrollmentTokenId);
+        url.setPath(QLatin1String("/v1/") + enrollmentTokenId);
 
-        qDebug() << "delete enrollmentToken" << url << enterpriseId << enrollmentTokenId;
+        qDebug() << "delete enrollmentToken" << url << enrollmentTokenId;
         QNetworkReply *reply = m_nam->deleteResource(defaultRequest(url));
         connect(reply, &QNetworkReply::finished, receiver, [=] {
-            const QByteArray data = reply->readAll();
-            qDebug() << "delete enrollmentTokens" << reply->error() << data;
-            if (!reply->error()) {
-                QJsonParseError error;
-                QJsonDocument doc = QJsonDocument::fromJson(data, &error);
-                if (!error.error) {
-                    qDebug() << "got delete enrollmentTokens" << doc.object();
-                } else {
-                    qWarning() << "Failed to parse delete enrollmentTokens" << data << error.errorString();
-                }
-            } else {
-                qWarning() << "delete enrollmentTokens failed" << reply->error();
-            }
-
-            code(credential);
+            requestFinished(reply, code);
         });
     });
 }
 
-void AndroidManagement::getDevice(const QObject *receiver, const QString &fullDeviceId, std::function<void (const GoogleCloudReply &)> code)
+void AndroidManagement::deleteEnrollmentToken(const QObject *receiver, const QString &enterpriseId, const QString &enrollmentTokenId, ReplyCb code)
+{
+    getAccessToken(receiver, [=] (const GoogleCloudReply &credential) {
+        if (credential.error) {
+            code(credential);
+            return;
+        }
+
+        QUrl url = m_service;
+        if (enterpriseId.startsWith(u"enterprises/")) {
+            url.setPath(QLatin1String("/v1/") + enterpriseId + QLatin1String("/enrollmentTokens/") + enrollmentTokenId);
+        } else {
+            url.setPath(QLatin1String("/v1/enterprises/") + enterpriseId + QLatin1String("/enrollmentTokens/") + enrollmentTokenId);
+        }
+
+        qDebug() << "delete enrollmentToken" << url << enterpriseId << enrollmentTokenId;
+        QNetworkReply *reply = m_nam->deleteResource(defaultRequest(url));
+        connect(reply, &QNetworkReply::finished, receiver, [=] {
+            requestFinished(reply, code);
+        });
+    });
+}
+
+void AndroidManagement::getDevice(const QObject *receiver, const QString &fullDeviceId, ReplyCb code)
 {
     getAccessToken(receiver, [=] (const GoogleCloudReply &credential) {
         if (credential.error) {
@@ -108,30 +228,12 @@ void AndroidManagement::getDevice(const QObject *receiver, const QString &fullDe
         qDebug() << "get device" << url << fullDeviceId;
         QNetworkReply *reply = m_nam->get(defaultRequest(url));
         connect(reply, &QNetworkReply::finished, receiver, [=] {
-            GoogleCloudReply deviceReply;
-            const QByteArray data = reply->readAll();
-            qDebug() << "get device" << reply->error() << data;
-            if (!reply->error()) {
-                QJsonParseError error;
-                const QJsonDocument doc = QJsonDocument::fromJson(data, &error);
-                if (!error.error) {
-                    deviceReply.data = doc.object();
-                    qDebug() << "got device" << doc.object();
-                } else {
-                    deviceReply.error = true;
-                    qWarning() << "Failed to parse google token file" << data << error.errorString();
-                }
-            } else {
-                deviceReply.error = true;
-                qWarning() << "get token failed" << reply->error();
-            }
-
-            code(deviceReply);
+            requestFinished(reply, code);
         });
     });
 }
 
-void AndroidManagement::getDevices(const QObject *receiver, const QString &enterpriseId, std::function<void (const GoogleCloudReply &)> code)
+void AndroidManagement::getDevices(const QObject *receiver, const QString &enterpriseId, ReplyCb code)
 {
     getAccessToken(receiver, [=] (const GoogleCloudReply &credential) {
         if (credential.error) {
@@ -140,35 +242,21 @@ void AndroidManagement::getDevices(const QObject *receiver, const QString &enter
         }
 
         QUrl url = m_service;
-        url.setPath(QLatin1String("/v1/enterprises/") + enterpriseId + QLatin1String("/devices"));
+        if (enterpriseId.startsWith(u"enterprises/")) {
+            url.setPath(QLatin1String("/v1/") + enterpriseId + QLatin1String("/devices"));
+        } else {
+            url.setPath(QLatin1String("/v1/enterprises/") + enterpriseId + QLatin1String("/devices"));
+        }
 
         qDebug() << "list devices" << url << enterpriseId;
         QNetworkReply *reply = m_nam->get(defaultRequest(url));
         connect(reply, &QNetworkReply::finished, receiver, [=] {
-            GoogleCloudReply deviceReply;
-            const QByteArray data = reply->readAll();
-            qDebug() << "list devices" << reply->error();
-            if (!reply->error()) {
-                QJsonParseError error;
-                const QJsonDocument doc = QJsonDocument::fromJson(data, &error);
-                if (!error.error) {
-                    deviceReply.data = doc.object();
-                    qDebug() << "got devices" << doc.object();
-                } else {
-                    deviceReply.error = true;
-                    qWarning() << "Failed to parse google token file" << data << error.errorString();
-                }
-            } else {
-                deviceReply.error = true;
-                qWarning() << "get token failed" << reply->error();
-            }
-
-            code(deviceReply);
+            requestFinished(reply, code);
         });
     });
 }
 
-void AndroidManagement::patchDevice(const QObject *receiver, const QString &enterpriseId, const QString &deviceId, const QString &updateMask, const QJsonObject &device, std::function<void (const GoogleCloudReply &)> code)
+void AndroidManagement::patchDevice(const QObject *receiver, const QString &enterpriseId, const QString &deviceId, const QString &updateMask, const QJsonObject &device, ReplyCb code)
 {
     patchDevice(receiver, QLatin1String("enterprises/") + enterpriseId + QLatin1String("/devices/") + deviceId,
                 updateMask,
@@ -176,16 +264,16 @@ void AndroidManagement::patchDevice(const QObject *receiver, const QString &ente
                 code);
 }
 
-void AndroidManagement::patchDevice(const QObject *receiver, const QString &fullDeviceId, const QString &updateMask, const QJsonObject &device, std::function<void (const GoogleCloudReply &)> code)
+void AndroidManagement::patchDevice(const QObject *receiver, const QString &fullDeviceId, const QString &updateMask, const QJsonObject &device, ReplyCb code)
 {
     getAccessToken(receiver, [=] (const GoogleCloudReply &accessToken) {
         QUrl url = m_service;
         url.setPath(QLatin1String("/v1/") + fullDeviceId);
 
         if (!updateMask.isEmpty()) {
-            QUrlQuery query;
-            query.addQueryItem(QStringLiteral("updateMask"), updateMask);
-            url.setQuery(query);
+            url.setQuery(QUrlQuery{
+                             {QStringLiteral("updateMask"), updateMask},
+                         });
         }
 
         QNetworkRequest req = defaultRequest(url);
@@ -193,28 +281,12 @@ void AndroidManagement::patchDevice(const QObject *receiver, const QString &full
         qDebug() << "patch device" << url << fullDeviceId;
         QNetworkReply *reply = m_nam->sendCustomRequest(req, QByteArrayLiteral("PATCH"), QJsonDocument(device).toJson(QJsonDocument::Compact));
         connect(reply, &QNetworkReply::finished, receiver, [=] {
-            const QByteArray data = reply->readAll();
-            GoogleCloudReply gcr;
-            qDebug() << "patch device reply" << reply->error() << data;
-            if (!reply->error()) {
-                QJsonParseError error;
-                QJsonDocument doc = QJsonDocument::fromJson(data, &error);
-                if (!error.error) {
-                    gcr.data = doc.object();
-                    qDebug() << "got patch device" << doc.object();
-                } else {
-                    qWarning() << "Failed to parse google token file" << data << error.errorString();
-                }
-            } else {
-                qWarning() << "patch device failed" << reply->error();
-            }
-
-            code(accessToken);
+            requestFinished(reply, code);
         });
     });
 }
 
-void AndroidManagement::issueCommandDevice(const QObject *receiver, const QString &enterpriseId, const QString &deviceId, const QJsonObject &command, std::function<void (const GoogleCloudReply &)> code)
+void AndroidManagement::issueCommandDevice(const QObject *receiver, const QString &enterpriseId, const QString &deviceId, const QJsonObject &command, ReplyCb code)
 {
     issueCommandDevice(receiver,
                        QLatin1String("enterprises/") + enterpriseId + QLatin1String("/devices/") + deviceId,
@@ -222,7 +294,7 @@ void AndroidManagement::issueCommandDevice(const QObject *receiver, const QStrin
                        code);
 }
 
-void AndroidManagement::issueCommandDevice(const QObject *receiver, const QString &fullDeviceId, const QJsonObject &command, std::function<void (const GoogleCloudReply &)> code)
+void AndroidManagement::issueCommandDevice(const QObject *receiver, const QString &fullDeviceId, const QJsonObject &command, ReplyCb code)
 {
     getAccessToken(receiver, [=] (const GoogleCloudReply &accessToken) {
         QUrl url = m_service;
@@ -233,32 +305,17 @@ void AndroidManagement::issueCommandDevice(const QObject *receiver, const QStrin
         qDebug() << "issueCommand device" << url << fullDeviceId;
         QNetworkReply *reply = m_nam->post(req, QJsonDocument(command).toJson(QJsonDocument::Compact));
         connect(reply, &QNetworkReply::finished, receiver, [=] {
-            const QByteArray data = reply->readAll();
-            qDebug() << "issueCommand device reply" << reply->error() << data;
-            if (!reply->error()) {
-                QJsonParseError error;
-                QJsonDocument doc = QJsonDocument::fromJson(data, &error);
-                if (!error.error) {
-//                    m_token = doc.object();
-                    qDebug() << "got issueCommand device" << doc.object();
-                } else {
-                    qWarning() << "Failed to issueCommand device" << data << error.errorString();
-                }
-            } else {
-                qWarning() << "issueCommand device failed" << reply->error();
-            }
-
-            code(accessToken);
+            requestFinished(reply, code);
         });
     });
 }
 
-void AndroidManagement::deleteDevice(const QObject *receiver, const QString &enterpriseId, const QString &deviceId, std::function<void (const GoogleCloudReply &)> code)
+void AndroidManagement::deleteDevice(const QObject *receiver, const QString &enterpriseId, const QString &deviceId, ReplyCb code)
 {
     deleteDevice(receiver, QLatin1String("enterprises/") + enterpriseId + QLatin1String("/devices/") + deviceId, code);
 }
 
-void AndroidManagement::deleteDevice(const QObject *receiver, const QString &fullDeviceId, std::function<void (const GoogleCloudReply &)> code)
+void AndroidManagement::deleteDevice(const QObject *receiver, const QString &fullDeviceId, ReplyCb code)
 {
     getAccessToken(receiver, [=] (const GoogleCloudReply &accessToken) {
         QUrl url = m_service;
@@ -267,62 +324,30 @@ void AndroidManagement::deleteDevice(const QObject *receiver, const QString &ful
         qDebug() << "delete deviceId" << url << fullDeviceId;
         QNetworkReply *reply = m_nam->deleteResource(defaultRequest(url));
         connect(reply, &QNetworkReply::finished, receiver, [=] {
-            const QByteArray data = reply->readAll();
-            GoogleCloudReply gcr;
-            qDebug() << "delete deviceId" << reply->error() << data;
-            if (!reply->error()) {
-                QJsonParseError error;
-                QJsonDocument doc = QJsonDocument::fromJson(data, &error);
-                if (!error.error) {
-                    gcr.data = doc.object();
-                    qDebug() << "got delete deviceId" << gcr.data;
-                } else {
-                    qWarning() << "Failed to parse delete deviceId" << data << error.errorString();
-                }
-            } else {
-                qWarning() << "delete deviceId failed" << reply->error();
-            }
-
-            code(gcr);
+            requestFinished(reply, code);
         });
     });
 }
 
-void AndroidManagement::getPolicies(const QObject *receiver, const QString &enterpriseId, std::function<void (const GoogleCloudReply &, const std::vector<AndroidManagementPolicy> &)> code)
+void AndroidManagement::getPolicies(const QObject *receiver, const QString &enterpriseId, ReplyCb code)
 {
     getAccessToken(receiver, [=] (const GoogleCloudReply &accessToken) {
         QUrl url = m_service;
-        url.setPath(QLatin1String("/v1/enterprises/") + enterpriseId + QLatin1String("/policies"));
+        if (enterpriseId.startsWith(u"enterprises/")) {
+            url.setPath(QLatin1String("/v1/") + enterpriseId + QLatin1String("/policies"));
+        } else {
+            url.setPath(QLatin1String("/v1/enterprises/") + enterpriseId + QLatin1String("/policies"));
+        }
 
         qDebug() << "list policies" << url << enterpriseId;
         QNetworkReply *reply = m_nam->get(defaultRequest(url));
         connect(reply, &QNetworkReply::finished, receiver, [=] {
-            const QByteArray data = reply->readAll();
-            std::vector<AndroidManagementPolicy> policies;
-
-            qDebug() << "list policies" << reply->error();
-            if (!reply->error()) {
-                QJsonParseError error;
-                QJsonDocument doc = QJsonDocument::fromJson(data, &error);
-                if (!error.error) {
-                    const QJsonArray array = doc.object()[QStringLiteral("policies")].toArray();
-                    qDebug() << "got policies" << array;
-                    for (const QJsonValue &p : array) {
-                        policies.push_back(p.toObject());
-                    }
-                } else {
-                    qWarning() << "Failed to parse policies" << data << error.errorString();
-                }
-            } else {
-                qWarning() << "get policies failed" << reply->error();
-            }
-
-            code(accessToken, policies);
+            requestFinished(reply, code);
         });
     });
 }
 
-void AndroidManagement::getPolicy(const QObject *receiver, const QString &enterpriseId, const QString &policyId, std::function<void (const GoogleCloudReply &, const AndroidManagementPolicy &)> code)
+void AndroidManagement::getPolicy(const QObject *receiver, const QString &enterpriseId, const QString &policyId, ReplyCb code)
 {
     getAccessToken(receiver, [=] (const GoogleCloudReply &accessToken) {
         QUrl url = m_service;
@@ -332,71 +357,56 @@ void AndroidManagement::getPolicy(const QObject *receiver, const QString &enterp
         qDebug() << "list devices" << url << enterpriseId;
         QNetworkReply *reply = m_nam->get(req);
         connect(reply, &QNetworkReply::finished, receiver, [=] {
-            QJsonObject obj;
-            const QByteArray data = reply->readAll();
-            qDebug() << "get policy" << reply->error() << data;
-            if (!reply->error()) {
-                QJsonParseError error;
-                QJsonDocument doc = QJsonDocument::fromJson(data, &error);
-                if (!error.error) {
-                    obj = doc.object();
-                    qDebug() << "got policy" << doc.object();
-                } else {
-                    qWarning() << "Failed to parse google token file" << data << error.errorString();
-                }
-            } else {
-                qWarning() << "get policy failed" << reply->error();
-            }
-
-            code(accessToken, obj);
+            requestFinished(reply, code);
         });
     });
 }
 
-void AndroidManagement::patchPolicy(const QObject *receiver, const QString &enterpriseId, const QString &policyId, const QString &updateMask, const QJsonObject &policy, std::function<void (const GoogleCloudReply &)> code)
+void AndroidManagement::patchPolicy(const QObject *receiver, const QString &enterpriseId, const QString &policyId, const QString &updateMask, const QJsonObject &policy, ReplyCb code)
+{
+    QString policyName;
+    if (enterpriseId.startsWith(u"enterprises/")) {
+        policyName = enterpriseId + QLatin1String("/policies/") + policyId;
+    } else {
+        policyName = QLatin1String("enterprises/") + QLatin1String("/policies/") + policyId;
+    }
+    patchPolicy(receiver, policyName, updateMask, policy, code);
+}
+
+void AndroidManagement::patchPolicy(const QObject *receiver, const QString &policyName, const QString &updateMask, const QJsonObject &policy, ReplyCb code)
 {
     getAccessToken(receiver, [=] (const GoogleCloudReply &accessToken) {
         QUrl url = m_service;
-        url.setPath(QLatin1String("/v1/enterprises/") + enterpriseId + QLatin1String("/policies/") + policyId);
+        url.setPath(QLatin1String("/v1/") + policyName);
 
         if (!updateMask.isEmpty()) {
-            QUrlQuery query;
-            query.addQueryItem(QStringLiteral("updateMask"), updateMask);
-            url.setQuery(query);
+            url.setQuery(QUrlQuery{
+                             {QStringLiteral("updateMask"), updateMask},
+                         });
         }
 
         QNetworkRequest req = defaultRequest(url);
         req.setHeader(QNetworkRequest::ContentTypeHeader, QByteArrayLiteral("application/json"));
-        qDebug() << "patch policy" << url << enterpriseId;
+        qDebug() << "patch policy" << url << updateMask;
         QNetworkReply *reply = m_nam->sendCustomRequest(req, QByteArrayLiteral("PATCH"), QJsonDocument(policy).toJson(QJsonDocument::Compact));
         connect(reply, &QNetworkReply::finished, receiver, [=] {
-            const QByteArray data = reply->readAll();
-            GoogleCloudReply gcr;
-            qDebug() << "patch policy reply" << reply->error() << data;
-            if (!reply->error()) {
-                QJsonParseError error;
-                QJsonDocument doc = QJsonDocument::fromJson(data, &error);
-                if (!error.error) {
-                    gcr.data = doc.object();
-                    qDebug() << "got patch policy" << doc.object();
-                } else {
-                    qWarning() << "Failed to parse google token file" << data << error.errorString();
-                }
-            } else {
-                qWarning() << "patch policy failed" << reply->error();
-            }
-
-            code(gcr);
+            requestFinished(reply, code);
         });
     });
 }
 
-void AndroidManagement::deletePolicy(const QObject *receiver, const QString &enterpriseId, const QString &policyId, std::function<void (const GoogleCloudReply &)> code)
+void AndroidManagement::deletePolicy(const QObject *receiver, const QString &enterpriseId, const QString &policyId, ReplyCb code)
 {
-    deletePolicy(receiver, QLatin1String("enterprises/") + enterpriseId + QLatin1String("/policies/") + policyId, code);
+    QString policyName;
+    if (enterpriseId.startsWith(u"enterprises/")) {
+        policyName = enterpriseId + QLatin1String("/policies/") + policyId;
+    } else {
+        policyName = QLatin1String("enterprises/") + QLatin1String("/policies/") + policyId;
+    }
+    deletePolicy(receiver, policyName, code);
 }
 
-void AndroidManagement::deletePolicy(const QObject *receiver, const QString &fullPolicyId, std::function<void (const GoogleCloudReply &)> code)
+void AndroidManagement::deletePolicy(const QObject *receiver, const QString &fullPolicyId, ReplyCb code)
 {
     getAccessToken(receiver, [=] (const GoogleCloudReply &accessToken) {
         QUrl url = m_service;
@@ -405,23 +415,30 @@ void AndroidManagement::deletePolicy(const QObject *receiver, const QString &ful
         qDebug() << "delete policyId" << url << fullPolicyId;
         QNetworkReply *reply = m_nam->deleteResource(defaultRequest(url));
         connect(reply, &QNetworkReply::finished, receiver, [=] {
-            const QByteArray data = reply->readAll();
-            GoogleCloudReply gcr;
-            qDebug() << "delete policyId" << reply->error() << data;
-            if (!reply->error()) {
-                QJsonParseError error;
-                QJsonDocument doc = QJsonDocument::fromJson(data, &error);
-                if (!error.error) {
-                    gcr.data = doc.object();
-                    qDebug() << "got delete policyId" << gcr.data;
-                } else {
-                    qWarning() << "Failed to parse delete policyId" << data << error.errorString();
-                }
-            } else {
-                qWarning() << "delete policyId failed" << reply->error();
-            }
-
-            code(gcr);
+            requestFinished(reply, code);
         });
     });
 }
+
+void AndroidManagement::requestFinished(QNetworkReply *reply, ReplyCb code)
+{
+    reply->deleteLater();
+
+    const QByteArray data = reply->readAll();
+    GoogleCloudReply gcr;
+
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+    if (!error.error) {
+        gcr.data = doc.object();
+        gcr.error = reply->error();
+        qDebug() << "AM got data" << reply->error() << gcr.data;
+    } else {
+        qWarning() << "AM Failed to parse data" << data << error.errorString();
+        gcr.error = true;
+    }
+
+    code(gcr);
+}
+
+#include "moc_androidmanagement.cpp"

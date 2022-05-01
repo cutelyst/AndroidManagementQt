@@ -8,7 +8,7 @@
 
 #include <QtCore/QtGlobal>
 
-#if defined(AndroidManagementQt5_EXPORTS) || defined(AndroidManagementQt6_EXPORTS)
+#if defined(AndroidManagement0Qt5_EXPORTS) || defined(AndroidManagement0Qt6_EXPORTS)
 #define ANDROID_MANAGEMENT_QT_EXPORT Q_DECL_EXPORT
 #else
 #define ANDROID_MANAGEMENT_QT_EXPORT Q_DECL_IMPORT
